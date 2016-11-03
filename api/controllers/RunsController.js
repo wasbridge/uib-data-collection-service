@@ -7,6 +7,7 @@
 
 var fs = require('fs');
 var archiver = require('archiver');
+var SkipperDisk = require('skipper-disk');
 
 module.exports = {
 
@@ -30,10 +31,22 @@ module.exports = {
 	},
 
 	download: function(req, res, next) {
+		var archiveFxn = this._archiveData;
 		Runs.find().exec(function(err, runs) {
 			if (err) return res.serverError(err);
 			if (runs.length > 0) {
-				return res.ok({message:"Found data", data: runs});
+				var zipFile = 'experiment_data.zip';
+	            var fd = require('path').resolve(sails.config.appPath, '.tmp/data-' + (new Date()).getTime()) + ".zip";
+	            archiveFxn(fd, runs, function(err, fd) {
+	            	if (err) return res.serverError(err);
+	            	
+	            	var fileAdapter = SkipperDisk();
+	            	fileAdapter.read(fd)
+		              .on('error', function (err) {
+	    	            return res.serverError(err);
+	        	      })
+	        		  .pipe(res.attachment(zipFile).type('application/zip'));
+	            });
 			} else  {
 				return res.ok({message:"Found no data", data: runs});
 			}
@@ -41,6 +54,20 @@ module.exports = {
 	},
 
 	_archiveData: function(fd, runs, next) {
+		var writeArray = function(key, arr) {
+			var ret = [];
+			var subKeys = key == "pageArrivals" ? ["page", "time"] : ["value"];
+
+			subKeys.forEach(function(subKey) {
+				var row = [key + " - " + subKey];
+				arr.forEach(function(item) {	
+					row.push(item[subKey]);
+				});
+				ret.push(row);
+			});
+			return ret;
+		};
+
 		var output = fs.createWriteStream(fd);
 		var archive = archiver('zip', {
 		    store: true // Sets the compression method to STORE.
@@ -62,26 +89,27 @@ module.exports = {
 		//for each blob create a CSV file
 		runs.forEach(function(run) {
 			var blob = run.blob;
-			var content = "";
+			var content = [];
 			
 			//each key gets it own row which will use the key for the label
 			for (var key in blob) {
 				var data = blob[key];
-				content += key + ", ";
-
-				//for overtime data only write out the values, not the time
 				if (data instanceof Array) {
-					data.forEach(function(value) {
-						content += value.value + ", ";
+					var arrRows = writeArray(key, data);
+					arrRows.forEach(function(row) {
+						content.push(row);
 					});
 				} else {
-					content += data;
+					content.push([key, data]);
 				}
-				//append for a new row
-				content += "\n";
 			}
 
-			archive.append(content, { name: "data-record-" + run.id + ".csv" });
+			var string = "";
+			content.forEach(function(row) {
+				string += row.join(", ") + "\n";
+			});
+
+			archive.append(string, { name: "experiment_data/data-record-" + run.id + ".csv" });
 		});
 
 		// finalize the archive (ie we are done appending files but streams have to finish yet)
