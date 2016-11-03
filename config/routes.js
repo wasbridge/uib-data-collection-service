@@ -34,7 +34,7 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
-  }
+  },
 
   /***************************************************************************
   *                                                                          *
@@ -46,4 +46,19 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
+  'GET /runs/download' : {
+    controller: 'RunsController',
+    action: 'download'
+  },
+
+  'POST /runs/erase' : {
+    controller: 'RunsController',
+    action: 'erase'
+  },
+
+  'POST /runs/create' : {
+    controller: 'RunsController',
+    action: 'store',
+    cors: true
+  }
 };
