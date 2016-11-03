@@ -59,7 +59,7 @@ module.exports = {
 			var subKeys = key == "pageArrivals" ? ["page", "time"] : ["value"];
 
 			subKeys.forEach(function(subKey) {
-				var row = [key + " - " + subKey];
+				var row = ["\"" + key + " - " + subKey + "\""];
 				arr.forEach(function(item) {	
 					row.push(item[subKey]);
 				});
@@ -100,7 +100,7 @@ module.exports = {
 						content.push(row);
 					});
 				} else {
-					content.push([key, data]);
+					content.push(["\"" + key + "\"", data]);
 				}
 			}
 
