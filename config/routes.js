@@ -58,17 +58,20 @@ module.exports.routes = {
 
   'GET /user/status': {
     controller: 'AuthController',
-    action: 'status'
+    action: 'status',
+    cors: true
   },
 
   'POST /login': {
     controller: 'AuthController',
-    action: 'login'
+    action: 'login',
+    cors: true
   },
 
   '/logout': {
     controller: 'AuthController',
-    action: 'logout'
+    action: 'logout',
+    cors: true
   },
 
   'GET /runs/download' : {
