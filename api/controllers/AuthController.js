@@ -24,7 +24,7 @@ module.exports = {
         passport.authenticate('local', function(err, user, info) {
 
             if ((err) || (!user)) {
-                if (redirect.length > 0) {
+                if (redirect) {
                     return res.redirect('/login');
                 } else {
                     return res.ok({
@@ -36,7 +36,7 @@ module.exports = {
             }
             req.logIn(user, function(err) {
                 if (err) {
-                    if (redirect.length > 0) {
+                    if (redirect) {
                         return res.redirect('/login');
                     } else {
                         return res.ok({
@@ -47,13 +47,13 @@ module.exports = {
                     }
                 }
 
-                if (redirect.length > 0) {
+                if (redirect) {
                     return res.redirect(redirect);
                 }
                 
                 return res.ok({
                 	success: true,
-                    message: info.message,
+                    message: "Logged in successfully",
                     user: user
                 });
             });
@@ -63,8 +63,8 @@ module.exports = {
     logout: function(req, res) {
         var redirect = req.param('redirect');
         req.logout();
-        if (redirect.length > 0) {
-            return res.redirect('/');
+        if (redirect) {
+            return res.redirect(redirect);
         } else {
             return res.ok({
                 success: true,
