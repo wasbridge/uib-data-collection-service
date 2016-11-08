@@ -33,7 +33,8 @@ module.exports.routes = {
   ***************************************************************************/
 
   '/': {
-    view: 'homepage'
+    controller: 'AuthController',
+    action: 'admin'
   },
 
   /***************************************************************************
@@ -45,6 +46,30 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
+
+  'GET /admin': {
+    controller: 'AuthController',
+    action: 'admin'
+  },
+
+  'GET /login': {
+    view: 'auth/login'
+  },
+
+  'GET /user/status': {
+    controller: 'AuthController',
+    action: 'status'
+  },
+
+  'POST /login': {
+    controller: 'AuthController',
+    action: 'login'
+  },
+
+  '/logout': {
+    controller: 'AuthController',
+    action: 'logout'
+  },
 
   'GET /runs/download' : {
     controller: 'RunsController',
@@ -60,5 +85,16 @@ module.exports.routes = {
     controller: 'RunsController',
     action: 'store',
     cors: true
+  },
+
+  'POST /users/upload' : {
+    controller: 'UsersController',
+    action: 'upload'
+  },
+
+  'POST /users/erase' : {
+    controller: 'UsersController',
+    action: 'erase'
   }
+
 };

@@ -1,0 +1,39 @@
+<style>
+	.group {
+		margin: 10px;
+		padding: 10px;
+		border: 1px solid black;
+	}
+</style>
+
+<div class="group">
+	<form action="/logout?redirect=/login" method="POST">
+	  <input type="submit" value="Logout"></input>
+	</form>
+	<br/>
+	<form action="/runs/erase" method="POST">
+	  <input type="submit" value="Erase All Student Data"></input>
+	</form>
+</div>
+
+<div class="group">
+	<form action="/runs/download" method="GET">
+	  <input type="submit" value="Download Student Data"></input>
+	</form>
+	<br/>
+	<form action="/runs/erase" method="POST">
+	  <input type="submit" value="Erase All Student Data"></input>
+	</form>
+</div>
+
+<div class="group">
+	<form action="/users/upload" method="POST" enctype="multipart/form-data">
+	  <input name="content" type="file" accept="text/csv"/>
+	  <br/>
+	  <input type="submit" value="Create student accounts from choosen CSV file"></input>
+	</form>
+	<br/>
+	<form action="/users/erase" method="POST">
+	  <input type="submit" value="Erase All Student Accounts (no one will be able to login)"></input>
+	</form>
+</div>
