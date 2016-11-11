@@ -8,6 +8,7 @@
 var fs = require('fs');
 var parse = require('csv-parse');
 var async = require('async');
+var firstline = require('firstline');
 
 module.exports = {
 	upload: function(req, res, next) {
@@ -23,39 +24,42 @@ module.exports = {
 					});
 			}
 
-			var parser = parse({delimiter: ','}, function parseStream(err, data){
-				if (err)
-					return res.serverError(err);
-
-				data.shift(0); //remove the header row
-				
-				var created = [];
-				async.each(data, function parseRow(row, callback) {
-					var userObj = {
-						userName: row[0],
-						password: row[1],
-						admin: row.length > 2 && row[2] == 'true' ? true : false
-					};
-
-					Users.create(userObj).exec(function userCreated(err, user) {
-						if (!err)
-							created.push(user);
-						callback(null, user);
-					});
-				}, function usersCreated(err, users) {
+			var file = files[0].fd;
+			firstline(file).then(function(firstLine) {
+				var delimiter = firstLine.indexOf(';') >= 0 ? ';' : ',';
+				var parser = parse({delimiter: delimiter}, function parseStream(err, data){
 					if (err)
 						return res.serverError(err);
+
+					data.shift(0); //remove the header row
 					
-					return res.ok({
-						success: true,
-						message: "Uploaded the following users, some may be duplicates and were skipped",
-						users: created
+					var created = [];
+					async.each(data, function parseRow(row, callback) {
+						var userObj = {
+							userName: row[0],
+							password: row[1],
+							admin: row.length > 2 && row[2] == 'true' ? true : false
+						};
+
+						Users.create(userObj).exec(function userCreated(err, user) {
+							if (!err)
+								created.push(user);
+							callback(null, user);
+						});
+					}, function usersCreated(err, users) {
+						if (err)
+							return res.serverError(err);
+						
+						return res.ok({
+							success: true,
+							message: "Uploaded the following users, some may be duplicates and were skipped",
+							users: created
+						});
 					});
 				});
-			});
 
-			var file = files[0].fd;
-			fs.createReadStream(file).pipe(parser);
+				fs.createReadStream(file).pipe(parser);
+			});
 		});
 	},
 
